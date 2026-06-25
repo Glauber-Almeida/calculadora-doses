@@ -183,6 +183,32 @@ const MEDS = {
         alertas: c.peso < 5 ? ["Contraindicado abaixo de 5 kg / 3 meses."] : [] };
     } },
 
+  novalgina_solucao: { grupo:"Analgésicos / Antitérmicos (solução oral)", nome:"Novalgina Solução Oral", principio:"Dipirona", apres:"50 mg/mL (seringa/copo dosador)", modo:"peso",
+    calc: c => {
+      const faixas = [
+        {min:5, max:8, idade:"3 a 11 meses", minMl:1.25, maxMl:2.5, maxDia:10},
+        {min:9, max:15, idade:"1 a 3 anos", minMl:2.5, maxMl:5, maxDia:20},
+        {min:16, max:23, idade:"4 a 6 anos", minMl:3.75, maxMl:7.5, maxDia:30},
+        {min:24, max:30, idade:"7 a 9 anos", minMl:5, maxMl:10, maxDia:40},
+        {min:31, max:45, idade:"10 a 12 anos", minMl:7.5, maxMl:15, maxDia:60},
+        {min:46, max:53, idade:"13 a 14 anos", minMl:8.75, maxMl:17.5, maxDia:70}
+      ];
+      const f = faixas.find(x => c.peso >= x.min && c.peso <= x.max);
+      if (!f) {
+        if (c.peso < 5) return erro("Contraindicado para crianças menores de 3 meses ou com menos de 5 kg.");
+        return erro("Acima de 53 kg / 14 anos: considerar posologia de adulto ou outra apresentação, conforme avaliação clínica.");
+      }
+      return {
+        posologia: `Novalgina Infantil solução oral 50 mg/mL: Tomar ${fmt(f.minMl)} a ${fmt(f.maxMl)} mL de 6/6h, se necessário.`,
+        info:[
+          `Faixa da bula: ${f.min}–${f.max} kg (${f.idade}). Dose única: ${fmt(f.minMl*50)} a ${fmt(f.maxMl*50)} mg.`,
+          `Dose máxima diária: ${fmt(f.maxDia)} mL (${fmt(f.maxDia*50)} mg), equivalente a 4 tomadas de ${fmt(f.maxMl)} mL.`,
+          `Administrar por via oral com seringa ou copo dosador. Não ultrapassar 4 tomadas ao dia.`
+        ],
+        alertas: []
+      };
+    } },
+
   alivium: { grupo:"Analgésicos / Antitérmicos (gotas)", nome:"Alivium", principio:"Ibuprofeno", apres:"50 ou 100 mg/mL (1 gota = 5 ou 10 mg)", modo:"peso", campos:["alivium"],
     calc: c => {
       // 10 gotas/mL: 50 mg/mL => 5 mg/gota ; 100 mg/mL => 10 mg/gota
