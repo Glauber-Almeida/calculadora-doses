@@ -1,1 +1,0 @@
-Nota: o Safari/iOS procura automaticamente por /apple-touch-icon.png quando o usuário adiciona uma página à Tela de Início.
