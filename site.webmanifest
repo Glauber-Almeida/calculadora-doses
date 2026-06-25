@@ -1,0 +1,16 @@
+{
+  "name": "Calculadora de Doses Pediátricas",
+  "short_name": "Doses Ped",
+  "description": "Calculadora de apoio para doses pediátricas.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
