@@ -1,0 +1,3 @@
+O arquivo apple-touch-icon.png foi adicionado para ser detectado pelo Safari/iOS quando a calculadora for adicionada à Tela de Início.
+
+Observação: se o atalho já existia no iPhone, pode ser necessário apagar o atalho antigo e adicionar novamente para o iOS buscar o novo ícone.
