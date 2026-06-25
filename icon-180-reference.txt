@@ -1,0 +1,1 @@
+Este repositório usa apple-touch-icon.png na raiz para o atalho do iOS.
