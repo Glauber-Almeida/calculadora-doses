@@ -1,254 +1,454 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Calculadora Doses Pediátricas 2.0</title>
+<title>Calculadora de Doses Pediátricas 3.0</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { font-family: 'Inter', system-ui, sans-serif; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .fade-in { animation: fade .25s ease; }
+  @keyframes fade { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform:none;} }
+  /* tira as setinhas dos inputs number */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+</style>
 </head>
-<body class="bg-gray-100 text-gray-800">
-<div class="max-w-xl mx-auto p-6 mt-10 bg-white shadow-md rounded">
-<h2 class="text-2xl font-bold mb-4 text-center">Calculadora de Doses Pediátricas 2.0</h2>
-<label class="block font-medium mb-1">1️⃣ Selecione o medicamento:</label>
-<select class="border rounded w-full mb-4 p-2" id="medicamento" onchange="atualizarCampos()">
-<option value="">-- Escolha um medicamento --</option>
-<optgroup label="Antibióticos (mg/kg)">
-<option value="clavulin_bd">Clavulin BD</option>
-<option value="clavulin_es">Clavulin ES</option>
-<option value="zinnat">Zinnat</option>
-<option value="terza">Terza</option>
-<option value="klaricid">Klaricid</option>
-<option value="ceclor">Ceclor</option>
-<option value="trifamox">Trifamox</option>
-</optgroup>
-<optgroup label="Analgésicos / Antitérmicos (gotas)">
-<option value="profenid">Profenid</option>
-<option value="novalgina">Novalgina</option>
-<option value="tylenol">Tylenol</option>
-<option value="alivium">Alivium</option>
-</optgroup>
-<optgroup label="Prelone (escalonado)">
-<option value="prelone_gotas">Prelone Gotas</option>
-<option value="prelone_xarope">Prelone Xarope</option>
-</optgroup>
-<optgroup label="Antialérgicos e Descongestionantes"><option value="koide_d">Koide D</option>
-<option value="zyxen">Zyxen</option>
-<option value="esalerg">Esalerg</option>
-<option value="allegra">Allegra</option>
-<option value="montelair">Montelair</option>
-<option value="percof">Percof</option>
-<option value="decongex">Decongex Plus Gotas</option>
-</optgroup>
-<optgroup label="Uso fixo">
-<option value="avamys">Avamys</option>
-<option value="nasoar">Nasoar</option>
-<option value="rinosoro">Rinosoro</option>
-</optgroup>
-<option value="manual">Outro medicamento (entrada manual)</option>
-</select>
-<div class="hidden" id="campos-variaveis">
-<div class="mb-4 hidden" id="campo-peso">
-<label class="block font-medium">Peso (kg):</label>
-<input class="border rounded w-full p-2" id="peso" type="number"/>
-</div>
-<div class="mb-4 hidden" id="campo-idade">
-<label class="block font-medium">Idade (anos):</label>
-<input class="border rounded w-full p-2" id="idade" type="number"/>
-</div>
-<div class="hidden bg-yellow-50 p-4 border rounded mb-4" id="manual-fields">
-<label>Dose mínima (mg/kg):</label>
-<input class="border rounded w-full mb-2 p-2" id="doseMin" type="number"/>
-<label>Dose máxima (mg/kg):</label>
-<input class="border rounded w-full mb-2 p-2" id="doseMax" type="number"/>
-<label>Concentração:</label>
-<div class="flex gap-2 mb-2">
-<input class="border rounded w-full p-2" id="concentracao" type="number"/>
-<select class="border rounded p-2" id="unidadeConcentracao">
-<option value="1">mg/mL</option>
-<option value="0.2">mg/5mL</option>
-</select>
-</div>
-<label>Doses por dia:</label>
-<input class="border rounded w-full mb-2 p-2" id="divisoes" type="number"/>
-<label>Dose máxima total (mg/dia):</label>
-<input class="border rounded w-full mb-2 p-2" id="doseMaxTotal" type="number"/>
-<label>Volume do frasco (mL):</label>
-<input class="border rounded w-full mb-2 p-2" id="frasco" type="number"/>
-</div>
-<button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full" onclick="calcular()">
-        Calcular
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+
+  <!-- Cabeçalho -->
+  <header class="text-center mb-6">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 text-white text-3xl shadow-lg mb-3">💊</div>
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Calculadora de Doses Pediátricas</h1>
+    <p class="text-slate-500 mt-1 text-sm">Versão 3.0 · Dr. Glauber Almeida</p>
+  </header>
+
+  <!-- Aviso de segurança -->
+  <div class="flex gap-3 items-start bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 mb-6 text-sm">
+    <span class="text-lg leading-none mt-0.5">⚠️</span>
+    <p><strong>Ferramenta de apoio à prescrição.</strong> Os cálculos seguem as bulas brasileiras, mas <strong>não substituem o julgamento clínico</strong>. Confira sempre a dose, a apresentação disponível e as contraindicações antes de prescrever.</p>
+  </div>
+
+  <!-- Card principal -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+
+    <label class="block text-sm font-semibold text-slate-700 mb-2" for="medicamento">1. Medicamento</label>
+    <select id="medicamento" onchange="atualizarCampos()"
+      class="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition mb-5">
+      <option value="">— Escolha um medicamento —</option>
+    </select>
+
+    <!-- Princípio ativo / apresentação -->
+    <div id="info-medicamento" class="hidden -mt-3 mb-5 text-xs text-slate-500"></div>
+
+    <!-- Campos dinâmicos -->
+    <div id="campos" class="hidden space-y-4">
+
+      <div id="campo-peso" class="hidden">
+        <label class="block text-sm font-semibold text-slate-700 mb-1" for="peso">Peso (kg)</label>
+        <input id="peso" type="number" inputmode="decimal" step="0.1" min="0" placeholder="ex.: 14"
+          class="w-full rounded-xl border border-slate-300 p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"/>
+      </div>
+
+      <div id="campo-idade" class="hidden">
+        <label class="block text-sm font-semibold text-slate-700 mb-1" for="idade">Idade (anos)</label>
+        <input id="idade" type="number" inputmode="decimal" step="0.1" min="0" placeholder="ex.: 3 (use 0,5 para 6 meses)"
+          class="w-full rounded-xl border border-slate-300 p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"/>
+      </div>
+
+      <!-- Concentração do Alivium -->
+      <div id="campo-alivium" class="hidden">
+        <label class="block text-sm font-semibold text-slate-700 mb-1">Concentração do Alivium gotas</label>
+        <div class="flex gap-2">
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="aliviumConc" value="50" class="peer sr-only" checked>
+            <div class="peer-checked:border-blue-500 peer-checked:bg-blue-50 border border-slate-300 rounded-xl p-3 text-center text-sm transition">50 mg/mL</div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="aliviumConc" value="100" class="peer sr-only">
+            <div class="peer-checked:border-blue-500 peer-checked:bg-blue-50 border border-slate-300 rounded-xl p-3 text-center text-sm transition">100 mg/mL</div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Entrada manual -->
+      <div id="campo-manual" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Parâmetros manuais</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-slate-600 mb-1">Dose mín. (mg/kg/dia)</label>
+            <input id="doseMin" type="number" class="w-full rounded-lg border border-slate-300 p-2"/></div>
+          <div><label class="block text-xs font-medium text-slate-600 mb-1">Dose máx. (mg/kg/dia)</label>
+            <input id="doseMax" type="number" class="w-full rounded-lg border border-slate-300 p-2"/></div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Concentração</label>
+          <div class="flex gap-2">
+            <input id="concentracao" type="number" placeholder="valor" class="w-full rounded-lg border border-slate-300 p-2"/>
+            <select id="unidadeConcentracao" class="rounded-lg border border-slate-300 p-2">
+              <option value="1">mg/mL</option>
+              <option value="0.2">mg/5mL</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-slate-600 mb-1">Doses por dia</label>
+            <input id="divisoes" type="number" class="w-full rounded-lg border border-slate-300 p-2"/></div>
+          <div><label class="block text-xs font-medium text-slate-600 mb-1">Dose máx. total (mg/dia)</label>
+            <input id="doseMaxTotal" type="number" class="w-full rounded-lg border border-slate-300 p-2"/></div>
+        </div>
+        <div><label class="block text-xs font-medium text-slate-600 mb-1">Volume do frasco (mL)</label>
+          <input id="frasco" type="number" class="w-full rounded-lg border border-slate-300 p-2"/></div>
+      </div>
+
+      <button onclick="calcular()"
+        class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[.99] text-white font-semibold py-3.5 rounded-xl shadow-sm transition">
+        Calcular dose
       </button>
+    </div>
+
+    <!-- Resultado -->
+    <div id="resultado" class="hidden mt-5"></div>
+  </div>
+
+  <footer class="text-center text-xs text-slate-400 mt-6 leading-relaxed">
+    Doses conferidas com bulas brasileiras (Anvisa). Uso profissional.<br>
+    Sempre individualize conforme indicação, função renal/hepática e peso atual.
+  </footer>
 </div>
-<div class="mt-4 p-4 bg-gray-50 border rounded hidden whitespace-pre-line" id="resultado"></div>
-</div>
+
 <script>
-function atualizarCampos() {
-  const med = document.getElementById("medicamento").value;
-  document.getElementById("campos-variaveis").classList.toggle("hidden", med === "");
-  document.getElementById("campo-peso").classList.add("hidden");
-  document.getElementById("campo-idade").classList.add("hidden");
-  document.getElementById("manual-fields").classList.add("hidden");
+/* =========================================================================
+   TABELA DE MEDICAMENTOS  —  edite as doses aqui (tudo num lugar só)
+   modo: 'peso' | 'idade' | 'pesoIdade' | 'fixo' | 'manual'
+   ATB por peso usa atb(): {min,max} mg/kg/dia, conc em mg/mL, maxDia em mg/dia,
+   dosesDia = nº de tomadas, dias = duração.
+   ========================================================================= */
+const MEDS = {
+  /* ---------- ANTIBIÓTICOS ---------- */
+  clavulin_bd: { grupo:"Antibióticos", nome:"Clavulin BD", principio:"Amoxicilina + clavulanato", apres:"400 mg/5 mL (80 mg/mL de amox.)", modo:"peso",
+    calc: c => atb(c.peso, {min:50,max:70,conc:80,maxDia:1750,dosesDia:2,dias:10,nome:"Clavulin BD 400 mg/5 mL"}) },
 
-  if (["clavulin_bd", "clavulin_es", "zinnat", "terza", "klaricid", "ceclor", "trifamox",
-       "profenid", "novalgina", "tylenol", "alivium", "prelone_gotas", "prelone_xarope",
-       "percof", "decongex"].includes(med)) {
-    document.getElementById("campo-peso").classList.remove("hidden");
-  }
+  clavulin_es: { grupo:"Antibióticos", nome:"Clavulin ES", principio:"Amoxicilina + clavulanato", apres:"600 mg/5 mL (120 mg/mL de amox.)", modo:"peso",
+    calc: c => atb(c.peso, {min:80,max:90,conc:120,maxDia:1750,dosesDia:2,dias:10,nome:"Clavulin ES 600 mg/5 mL"}) },
 
-  if (["koide_d", "zyxen", "esalerg", "allegra", "montelair", "percof", "decongex"].includes(med)) {
-    document.getElementById("campo-idade").classList.remove("hidden");
-  }
+  zinnat: { grupo:"Antibióticos", nome:"Zinnat", principio:"Cefuroxima", apres:"250 mg/5 mL (50 mg/mL)", modo:"peso",
+    calc: c => atb(c.peso, {min:20,max:30,conc:50,maxDia:500,dosesDia:2,dias:10,nome:"Zinnat 250 mg/5 mL"}) },
 
-  if (med === "manual") {
-    document.getElementById("campo-peso").classList.remove("hidden");
-    document.getElementById("manual-fields").classList.remove("hidden");
-  }
+  terza: { grupo:"Antibióticos", nome:"Terza", principio:"Cefdinir", apres:"250 mg/5 mL (50 mg/mL)", modo:"peso",
+    calc: c => atb(c.peso, {min:14,max:14,conc:50,maxDia:600,dosesDia:1,dias:10,nome:"Terza 250 mg/5 mL"}) },
+
+  klaricid: { grupo:"Antibióticos", nome:"Klaricid", principio:"Claritromicina", apres:"250 mg/5 mL (50 mg/mL)", modo:"peso",
+    calc: c => atb(c.peso, {min:15,max:15,conc:50,maxDia:1000,dosesDia:2,dias:10,nome:"Klaricid 250 mg/5 mL"}) },
+
+  ceclor: { grupo:"Antibióticos", nome:"Ceclor", principio:"Cefaclor", apres:"375 mg/5 mL (75 mg/mL)", modo:"peso",
+    calc: c => atb(c.peso, {min:20,max:40,conc:75,maxDia:1000,dosesDia:2,dias:10,nome:"Ceclor 375 mg/5 mL"}) },
+
+  trifamox: { grupo:"Antibióticos", nome:"Trifamox IBL BD", principio:"Amoxicilina + sulbactam", apres:"200 mg/mL", modo:"peso",
+    calc: c => atb(c.peso, {min:40,max:100,conc:200,maxDia:1750,dosesDia:2,dias:10,nome:"Trifamox IBL BD 200 mg/mL"}) },
+
+  astro: { grupo:"Antibióticos", nome:"Astro", principio:"Azitromicina", apres:"200 mg/5 mL (40 mg/mL)", modo:"peso",
+    calc: c => {
+      const mg = Math.min(c.peso*10, 500);
+      const ml = (mg/40);
+      return {
+        posologia: `Astro 200 mg/5 mL: Tomar ${fmt(ml)} mL (10 mg/kg) 1×/dia por 3 dias.`,
+        info: [
+          `Dose total do tratamento: 30 mg/kg (10 mg/kg/dia × 3 dias). Máx. 500 mg/dia.`,
+          `Alternativas da bula: faringite — 10 mg/kg no 1º dia + 5 mg/kg do 2º ao 5º dia; otite média aguda — 30 mg/kg em dose única.`
+        ],
+        alertas: c.peso*10 > 500 ? ["Dose limitada ao máximo de 500 mg/dia."] : []
+      };
+    } },
+
+  /* ---------- ANALGÉSICOS / ANTITÉRMICOS (gotas) ---------- */
+  tylenol: { grupo:"Analgésicos / Antitérmicos (gotas)", nome:"Tylenol", principio:"Paracetamol", apres:"200 mg/mL (1 gota = 10 mg)", modo:"peso",
+    calc: c => {
+      const gotas = Math.min(Math.round(c.peso), 35);
+      return { posologia: `Tylenol 200 mg/mL: Tomar ${gotas} gotas (1 gota/kg) de 6/6h, se necessário.`,
+        info:[`Equivale a ~10–15 mg/kg/dose. Máx. 35 gotas/dose e até 5 doses em 24h.`],
+        alertas: c.peso < 11 ? ["Abaixo de 11 kg / 2 anos: confirmar dose com o pediatra."] : [] };
+    } },
+
+  novalgina: { grupo:"Analgésicos / Antitérmicos (gotas)", nome:"Novalgina", principio:"Dipirona", apres:"500 mg/mL (1 gota = 25 mg)", modo:"peso",
+    calc: c => {
+      const gotas = Math.min(Math.round(c.peso), 40);
+      return { posologia: `Novalgina 500 mg/mL: Tomar ${gotas} gotas (1 gota/kg) de 6/6h, se necessário.`,
+        info:[`1 gota = 25 mg (≈25 mg/kg/dose). Máx. 40 gotas (1000 mg)/dose, até 4×/dia.`],
+        alertas: c.peso < 5 ? ["Contraindicado abaixo de 5 kg / 3 meses."] : [] };
+    } },
+
+  alivium: { grupo:"Analgésicos / Antitérmicos (gotas)", nome:"Alivium", principio:"Ibuprofeno", apres:"50 ou 100 mg/mL (1 gota = 5 ou 10 mg)", modo:"peso", campos:["alivium"],
+    calc: c => {
+      // 10 gotas/mL: 50 mg/mL => 5 mg/gota ; 100 mg/mL => 10 mg/gota
+      const lim = { "50": {mgGota:5, maxDose:40, maxDia:160}, "100": {mgGota:10, maxDose:20, maxDia:80} };
+      const conc = c.aliviumConc;
+      const L = lim[conc];
+      const brutoMax = Math.round(c.peso*10/L.mgGota);
+      const gMin = Math.min(Math.round(c.peso*5/L.mgGota), L.maxDose);
+      const gMax = Math.min(brutoMax, L.maxDose);
+      const faixa = gMin===gMax ? `${gMin}` : `${gMin}–${gMax}`;
+      return { posologia: `Alivium ${conc} mg/mL: Tomar ${faixa} gotas (5–10 mg/kg) de 6/6h a 8/8h, se necessário.`,
+        info:[
+          `1 gota = ${L.mgGota} mg. Máx. ${L.maxDose} gotas/dose e ${L.maxDia} gotas/dia (< 12 anos).`,
+          `Uso a partir de 6 meses (cautela entre 6 meses e 2 anos).`
+        ],
+        alertas: brutoMax > L.maxDose ? [`Dose limitada ao máximo de ${L.maxDose} gotas/dose nesta concentração.`] : [] };
+    } },
+
+  profenid: { grupo:"AINEs", nome:"Profenid Gotas", principio:"Cetoprofeno", apres:"20 mg/mL (1 gota = 1 mg)", modo:"pesoIdade",
+    calc: c => {
+      if (c.idade < 1) return erro("Contraindicado abaixo de 1 ano (Profenid Gotas — bula Sanofi).");
+      const gotas = Math.min(Math.round(c.peso), 50);
+      return { posologia: `Profenid Gotas 20 mg/mL: Tomar ${gotas} gotas (1 gota/kg) de 6/6h a 8/8h, se necessário.`,
+        info: [
+          "1 gota = 1 mg de cetoprofeno (20 gotas = 1 mL). Diluir em um pouco de água.",
+          "Referências da bula: 7–11 anos ≈ 25 gotas; adulto 50 gotas. Dose máx. 300 mg (300 gotas)/dia."
+        ],
+        alertas: c.peso > 50 ? ["Acima de ~50 kg: usar dose de adulto (50 gotas/dose)."] : [] };
+    } },
+
+  /* ---------- PRELONE (esquema escalonado) ---------- */
+  prelone_gotas: { grupo:"Prelone (escalonado)", nome:"Prelone Gotas", principio:"Prednisolona", apres:"gotas", modo:"peso",
+    calc: c => ({ posologia:
+`Tomar ${Math.round(c.peso)} gotas de 12/12h por 5 dias;
+depois ${Math.round(c.peso)} gotas pela manhã por 3 dias;
+depois ${Math.round(c.peso/2)} gotas pela manhã por 2 dias.`,
+      alertas:["Confira a concentração do frasco e o alvo de mg/kg/dia (prednisolona ~1–2 mg/kg/dia) conforme a indicação."] }) },
+
+  prelone_xarope: { grupo:"Prelone (escalonado)", nome:"Prelone Xarope", principio:"Prednisolona", apres:"3 mg/mL", modo:"peso",
+    calc: c => ({ posologia:
+`Tomar ${fmt(c.peso/3)} mL por 5 dias;
+depois ${fmt((c.peso*0.5)/3)} mL por 3 dias;
+depois ${fmt((c.peso*0.25)/3)} mL por 2 dias.`,
+      alertas:["Confira o alvo de mg/kg/dia (prednisolona ~1–2 mg/kg/dia) conforme a indicação."] }) },
+
+  /* ---------- ANTIALÉRGICOS / DESCONGESTIONANTES ---------- */
+  koide_d: { grupo:"Antialérgicos e Descongestionantes", nome:"Kóide D", principio:"Dexclorfeniramina + betametasona", apres:"2 mg + 0,25 mg / 5 mL", modo:"idade",
+    calc: c => {
+      let t;
+      if (c.idade < 2) return erro("Contraindicado abaixo de 2 anos.");
+      else if (c.idade <= 6) t = "Tomar 2,5 mL de 8/8h por 5 dias.";
+      else if (c.idade <= 12) t = "Tomar 5 mL de 8/8h por 5 dias.";
+      else t = "Tomar 10 mL de 8/8h por 5 dias.";
+      return { posologia:`Kóide D: ${t}`, alertas:["Contém corticoide (betametasona): limite a duração e reavalie."] };
+    } },
+
+  zyxen: { grupo:"Antialérgicos e Descongestionantes", nome:"Zyxen", principio:"Levocetirizina", apres:"5 mg/mL (1 gota = 0,25 mg)", modo:"idade",
+    calc: c => {
+      if (c.idade < 2) return erro("Contraindicado abaixo de 2 anos.");
+      const t = c.idade <= 6 ? "Tomar 5 gotas de 12/12h" : "Tomar 20 gotas (1 mL) 1×/dia";
+      return { posologia:`Zyxen: ${t} por 30 dias.` };
+    } },
+
+  esalerg: { grupo:"Antialérgicos e Descongestionantes", nome:"Esalerg", principio:"Desloratadina", apres:"0,5 mg/mL", modo:"idade",
+    calc: c => {
+      if (c.idade < 0.5) return erro("Contraindicado abaixo de 6 meses.");
+      let t;
+      if (c.idade < 1) t = "Tomar 2 mL (1 mg) 1×/dia";
+      else if (c.idade <= 5) t = "Tomar 2,5 mL (1,25 mg) 1×/dia";
+      else t = "Tomar 5 mL (2,5 mg) 1×/dia";
+      return { posologia:`Esalerg: ${t} por 30 dias.` };
+    } },
+
+  allegra: { grupo:"Antialérgicos e Descongestionantes", nome:"Allegra Pediátrico", principio:"Fexofenadina", apres:"6 mg/mL", modo:"idade",
+    calc: c => {
+      if (c.idade < 0.5) return erro("Contraindicado abaixo de 6 meses.");
+      const t = c.idade < 2 ? "Tomar 2,5 mL (15 mg) de 12/12h" : "Tomar 5 mL (30 mg) de 12/12h";
+      return { posologia:`Allegra: ${t} por 30 dias.` };
+    } },
+
+  montelair: { grupo:"Antialérgicos e Descongestionantes", nome:"Montelair", principio:"Montelucaste", apres:"sachê/comp. 4–5–10 mg", modo:"idade",
+    calc: c => {
+      if (c.idade < 2) return erro("Apresentação de 4 mg a partir de 2 anos (granulado: a partir de 6 meses, sob avaliação).");
+      let t;
+      if (c.idade <= 5) t = "1 sachê/comp. de 4 mg";
+      else if (c.idade <= 14) t = "1 comp. de 5 mg";
+      else t = "1 comp. de 10 mg";
+      return { posologia:`Montelair: Tomar ${t} 1×/dia, à noite, por 30 dias.` };
+    } },
+
+  percof: { grupo:"Antialérgicos e Descongestionantes", nome:"Percof", principio:"Levodropropizina", apres:"6 mg/mL (xarope)", modo:"peso",
+    calc: c => {
+      let t;
+      if (c.peso < 10) return erro("Apresentação para crianças ≥ 2 anos (≈10 kg).");
+      else if (c.peso <= 20) t = "Tomar 3 mL de 8/8h";
+      else if (c.peso <= 30) t = "Tomar 5 mL de 8/8h";
+      else return erro("Acima de 30 kg: usar posologia de adulto/adolescente.");
+      return { posologia:`Percof (1 mg/kg/dose, até 3×/dia): ${t} por até 5 dias.` };
+    } },
+
+  decongex: { grupo:"Antialérgicos e Descongestionantes", nome:"Decongex Plus Gotas", principio:"Bronfeniramina + fenilefrina", apres:"gotas", modo:"pesoIdade",
+    calc: c => {
+      if (c.idade < 2) return erro("Contraindicado para menores de 2 anos.");
+      const porToma = Math.round(Math.min(c.peso*2, 60)/3);
+      return { posologia:`Decongex Plus: Tomar ${porToma} gotas de 8/8h por 5 dias.`,
+        alertas:["Contém vasoconstritor (fenilefrina): cuidado em cardiopatas e uso por tempo curto."] };
+    } },
+
+  /* ---------- USO FIXO ---------- */
+  avamys: { grupo:"Uso fixo", nome:"Avamys", principio:"Furoato de fluticasona (nasal)", apres:"spray", modo:"fixo",
+    calc: () => ({ posologia:"Aplicar 1 jato em cada narina à noite por 30 dias." }) },
+  nasoar: { grupo:"Uso fixo", nome:"Nasoar", principio:"Higiene nasal", apres:"sachê", modo:"fixo",
+    calc: () => ({ posologia:"Diluir 1 sachê em 120 mL de água morna e aplicar suavemente nas narinas." }) },
+  rinosoro: { grupo:"Uso fixo", nome:"Rinosoro", principio:"Solução fisiológica nasal", apres:"—", modo:"fixo",
+    calc: () => ({ posologia:"Aplicar na cavidade nasal várias vezes ao dia, conforme necessário." }) },
+
+  /* ---------- MANUAL ---------- */
+  manual: { grupo:"Outro", nome:"Outro medicamento (entrada manual)", principio:"—", apres:"—", modo:"manual",
+    calc: c => {
+      const concFinal = c.concentracao * c.fator;
+      const mgMinLim = Math.min(c.peso*c.doseMin, c.doseMaxTotal);
+      const mgMaxLim = Math.min(c.peso*c.doseMax, c.doseMaxTotal);
+      const mlMin = mgMinLim / c.divisoes / concFinal;
+      const mlMax = mgMaxLim / c.divisoes / concFinal;
+      const durMin = Math.floor(c.frasco / (mlMax * c.divisoes));
+      const durMax = Math.floor(c.frasco / (mlMin * c.divisoes));
+      const intervalo = 24 / c.divisoes;
+      return { posologia:`Tomar ${fmt(mlMin)} a ${fmt(mlMax)} mL de ${intervalo}/${intervalo}h.`,
+        info:[`Uma embalagem dura de ${durMin} a ${durMax} dias.`] };
+    } }
+};
+
+/* ================= Helpers de cálculo ================= */
+function fmt(n){ return (Math.round(n*100)/100).toString().replace('.', ','); }
+function erro(msg){ return { erro: msg }; }
+function intervaloLabel(dosesDia){
+  if (dosesDia === 1) return "1×/dia";
+  return `de ${24/dosesDia}/${24/dosesDia}h`;
+}
+function atb(peso, o){
+  const mgMinLim = Math.min(peso*o.min, o.maxDia);
+  const mgMaxLim = Math.min(peso*o.max, o.maxDia);
+  const mlMin = mgMinLim / o.dosesDia / o.conc;
+  const mlMax = mgMaxLim / o.dosesDia / o.conc;
+  const faixa = (o.min===o.max) ? `${fmt(mlMin)}` : `${fmt(mlMin)} a ${fmt(mlMax)}`;
+  const doseTxt = (o.min===o.max) ? `${o.min} mg/kg/dia` : `${o.min}–${o.max} mg/kg/dia`;
+  const alertas = (peso*o.max > o.maxDia) ? [`Dose limitada ao máximo de ${o.maxDia} mg/dia.`] : [];
+  return {
+    posologia: `${o.nome}: Tomar ${faixa} mL ${intervaloLabel(o.dosesDia)} por ${o.dias} dias.`,
+    info: [`Cálculo: ${doseTxt}.`],
+    alertas
+  };
 }
 
-function calcular() {
-  const med = document.getElementById("medicamento").value;
-  const peso = parseFloat(document.getElementById("peso").value);
-  const idade = parseFloat(document.getElementById("idade").value);
-  const res = document.getElementById("resultado");
-  let texto = "";
-
-  if (!med) {
-    texto = "Selecione um medicamento.";
-  } else if ((["clavulin_bd", "profenid", "novalgina", "tylenol", "alivium", "prelone_gotas", "prelone_xarope", "percof", "decongex", "manual"].includes(med)) && isNaN(peso)) {
-    texto = "Informe o peso.";
-  } else if ((["koide_d", "zyxen", "esalerg", "allegra", "montelair", "percof", "decongex"].includes(med)) && isNaN(idade)) {
-    texto = "Informe a idade.";
-  } else {
-    const respostasFixas = {
-      "avamys": "Aplicar 1 jato em cada narina à noite por 30 dias.",
-      "nasoar": "Diluir 1 sachê em 120 mL de água morna e aplicar suavemente nas narinas.",
-      "rinosoro": "Aplicar na cavidade nasal várias vezes ao dia conforme necessário."
-    };
-    if (respostasFixas[med]) {
-      texto = respostasFixas[med];
-    } else {
-      switch (med) {
-        case "clavulin_bd":
-          texto = gerarATB(peso, 50, 70, 80, 1750, "Clavulin BD 400mg/5mL");
-          break;
-        case "clavulin_es":
-          texto = gerarATB(peso, 80, 90, 120, 1750, "Clavulin ES 600mg/5mL");
-          break;
-        case "zinnat":
-          texto = gerarATB(peso, 20, 30, 50, 500, "Zinnat 250mg/5mL");
-          break;
-        case "terza": {
-          const doseMg = Math.min(peso * 14, 600);
-          const volume = (doseMg / 50).toFixed(2);
-          texto = `Terza 250mg/5mL: Tomar ${volume} mL em dose única diária por 10 dias.`;
-          break;
-        }
-        case "klaricid":
-          texto = gerarATB(peso, 15, 15, 50, 1000, "Klaricid 50mg/mL");
-          break;
-        case "ceclor":
-          texto = gerarATB(peso, 20, 40, 75, 1000, "Ceclor 375mg/5mL");
-          break;
-        case "trifamox":
-          texto = gerarATB(peso, 40, 100, 200, 1750, "Trifamox IBL BD 200mg/mL");
-          break;
-        case "profenid":
-        case "novalgina":
-        case "tylenol":
-        case "alivium":
-          texto = `Tomar ${Math.min(40, Math.round(peso))} gotas de 6/6h se necessário por 5 dias.`;
-          break;
-        case "prelone_gotas":
-          texto = `Tomar ${Math.round(peso)} gotas de 12/12h por 5 dias
-Tomar ${Math.round(peso)} gotas pela manhã por 3 dias
-Tomar ${Math.round(peso/2)} gotas pela manhã por 2 dias.`;
-          break;
-        case "prelone_xarope":
-          texto = `Tomar ${(peso/3).toFixed(1)} mL por 5 dias
-Tomar ${((peso*0.5)/3).toFixed(1)} mL por 3 dias
-Tomar ${((peso*0.25)/3).toFixed(1)} mL por 2 dias.`;
-          break;
-        case "koide_d":
-          if (idade < 2) texto = "Contraindicado abaixo de 2 anos.";
-          else if (idade <= 6) texto = "Tomar 2,5 mL de 8/8h por 5 dias.";
-          else if (idade <= 12) texto = "Tomar 5 mL de 8/8h por 5 dias.";
-          else texto = "Tomar 10 mL de 8/8h por 5 dias.";
-          break;
-        case "zyxen":
-          if (idade < 2) texto = "Contraindicado abaixo de 2 anos.";
-          else if (idade <= 5) texto = "Tomar 5 gotas de 12/12h por 30 dias.";
-          else texto = "Tomar 20 gotas ao dia por 30 dias.";
-          break;
-        case "esalerg":
-          if (idade < 0.5) texto = "Contraindicado abaixo de 6 meses.";
-          else if (idade < 1) texto = "Tomar 2 mL ao dia por 30 dias.";
-          else if (idade <= 5) texto = "Tomar 2,5 mL ao dia por 30 dias.";
-          else texto = "Tomar 5 mL ao dia por 30 dias.";
-          break;
-        case "allegra":
-          if (idade < 0.5) texto = "Contraindicado abaixo de 6 meses.";
-          else if (idade < 2) texto = "Tomar 2,5 mL de 12/12h por 30 dias.";
-          else texto = "Tomar 5 mL de 12/12h por 30 dias.";
-          break;
-        case "montelair":
-          if (idade < 2) texto = "Contraindicado abaixo de 2 anos.";
-          else if (idade <= 5) texto = "Tomar 1 comp de 4 mg ao dia por 30 dias.";
-          else if (idade <= 14) texto = "Tomar 1 comp de 5 mg ao dia por 30 dias.";
-          else texto = "Tomar 1 comp de 10 mg ao dia por 30 dias.";
-          break;
-        case "percof":
-          if (peso <= 20) texto = "Tomar 3 mL de 8/8h por 5 dias.";
-          else if (peso <= 30) texto = "Tomar 5 mL de 8/8h por 5 dias.";
-          else texto = "Peso fora da faixa para Percof.";
-          break;
-        case "decongex":
-          if (idade < 2) {
-            texto = "Medicamento contraindicado para menores de 2 anos.";
-          } else {
-            let doseTotal = peso * 2;
-            doseTotal = Math.min(doseTotal, 60);
-            let porToma = Math.round(doseTotal / 3);
-            texto = `Tomar ${porToma} gotas de 8/8h por 5 dias.`;
-          }
-          break;
-        case "manual":
-          const doseMin = parseFloat(document.getElementById("doseMin").value);
-          const doseMax = parseFloat(document.getElementById("doseMax").value);
-          const concentracao = parseFloat(document.getElementById("concentracao").value);
-          const fator = parseFloat(document.getElementById("unidadeConcentracao").value);
-          const divisoes = parseInt(document.getElementById("divisoes").value);
-          const doseMaxTotal = parseFloat(document.getElementById("doseMaxTotal").value);
-          const frasco = parseFloat(document.getElementById("frasco").value);
-
-          const concFinal = concentracao * fator;
-          const mgMin = peso * doseMin;
-          const mgMax = peso * doseMax;
-          const mgMinLim = Math.min(mgMin, doseMaxTotal);
-          const mgMaxLim = Math.min(mgMax, doseMaxTotal);
-          const mlMin = mgMinLim / divisoes / concFinal;
-          const mlMax = mgMaxLim / divisoes / concFinal;
-          const durMin = Math.floor(frasco / (mlMax * divisoes));
-          const durMax = Math.floor(frasco / (mlMin * divisoes));
-          texto = `Tomar ${mlMin.toFixed(2)} a ${mlMax.toFixed(2)} mL de ${24 / divisoes}/12 horas por 10 dias.
-Uma embalagem dura de ${durMin} a ${durMax} dias.`;
-          break;
+/* ================= Montagem do select ================= */
+(function buildSelect(){
+  const sel = document.getElementById("medicamento");
+  const grupos = {};
+  for (const [id, m] of Object.entries(MEDS)) {
+    (grupos[m.grupo] ||= []).push([id, m]);
+  }
+  for (const [grupo, itens] of Object.entries(grupos)) {
+    if (grupo === "Outro") {
+      for (const [id, m] of itens){
+        const o = document.createElement("option"); o.value=id; o.textContent=m.nome; sel.appendChild(o);
       }
+      continue;
     }
+    const og = document.createElement("optgroup"); og.label = grupo;
+    for (const [id, m] of itens){
+      const o = document.createElement("option"); o.value=id; o.textContent=m.nome; og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
+})();
+
+/* ================= Campos dinâmicos ================= */
+function atualizarCampos(){
+  const id = document.getElementById("medicamento").value;
+  const m = MEDS[id];
+  const campos = document.getElementById("campos");
+  const info = document.getElementById("info-medicamento");
+  document.getElementById("resultado").classList.add("hidden");
+
+  if (!m){ campos.classList.add("hidden"); info.classList.add("hidden"); return; }
+  campos.classList.remove("hidden");
+
+  info.innerHTML = `<span class="font-semibold text-slate-600">${m.principio}</span>${m.apres && m.apres!=="—" ? " · "+m.apres : ""}`;
+  info.classList.remove("hidden");
+
+  const need = {
+    peso: ["peso","pesoIdade"].includes(m.modo),
+    idade: ["idade","pesoIdade"].includes(m.modo),
+    alivium: (m.campos||[]).includes("alivium"),
+    manual: m.modo === "manual"
+  };
+  toggle("campo-peso", need.peso || need.manual);
+  toggle("campo-idade", need.idade);
+  toggle("campo-alivium", need.alivium);
+  toggle("campo-manual", need.manual);
+}
+function toggle(elId, show){ document.getElementById(elId).classList.toggle("hidden", !show); }
+
+/* ================= Cálculo + render ================= */
+function calcular(){
+  const id = document.getElementById("medicamento").value;
+  const m = MEDS[id];
+  if (!m) return render({ erro:"Selecione um medicamento." });
+
+  const ctx = {};
+  const need = {
+    peso: ["peso","pesoIdade"].includes(m.modo) || m.modo==="manual",
+    idade: ["idade","pesoIdade"].includes(m.modo),
+    alivium: (m.campos||[]).includes("alivium"),
+    manual: m.modo === "manual"
+  };
+
+  if (need.peso){
+    ctx.peso = parseFloat(document.getElementById("peso").value);
+    if (isNaN(ctx.peso) || ctx.peso<=0) return render({ erro:"Informe o peso (kg)." });
+  }
+  if (need.idade){
+    ctx.idade = parseFloat(document.getElementById("idade").value);
+    if (isNaN(ctx.idade) || ctx.idade<0) return render({ erro:"Informe a idade (anos). Use 0,5 para 6 meses." });
+  }
+  if (need.alivium){
+    ctx.aliviumConc = document.querySelector('input[name="aliviumConc"]:checked').value;
+  }
+  if (need.manual){
+    ctx.doseMin = parseFloat(document.getElementById("doseMin").value);
+    ctx.doseMax = parseFloat(document.getElementById("doseMax").value);
+    ctx.concentracao = parseFloat(document.getElementById("concentracao").value);
+    ctx.fator = parseFloat(document.getElementById("unidadeConcentracao").value);
+    ctx.divisoes = parseInt(document.getElementById("divisoes").value);
+    ctx.doseMaxTotal = parseFloat(document.getElementById("doseMaxTotal").value);
+    ctx.frasco = parseFloat(document.getElementById("frasco").value);
+    if ([ctx.doseMin,ctx.doseMax,ctx.concentracao,ctx.divisoes,ctx.doseMaxTotal,ctx.frasco].some(isNaN))
+      return render({ erro:"Preencha todos os campos manuais." });
   }
 
-  res.textContent = texto;
-  res.classList.remove("hidden");
+  render(m.calc(ctx));
 }
 
-function gerarATB(peso, min, max, conc, maxTotal, nome) {
-  const mgMin = peso * min;
-  const mgMax = peso * max;
-  const mgMinLim = Math.min(mgMin, maxTotal);
-  const mgMaxLim = Math.min(mgMax, maxTotal);
-  const mlMin = (mgMinLim / 2 / conc).toFixed(2);
-  const mlMax = (mgMaxLim / 2 / conc).toFixed(2);
-  return `${nome}: Tomar ${mlMin} a ${mlMax} mL de 12/12 horas por 10 dias.`;
+function render(r){
+  const box = document.getElementById("resultado");
+  box.classList.remove("hidden");
+  box.classList.add("fade-in");
+
+  if (r.erro){
+    box.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">${r.erro}</div>`;
+    return;
+  }
+
+  const alertas = (r.alertas||[]).map(a =>
+    `<div class="flex gap-2 items-start bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm"><span>⚠️</span><span>${a}</span></div>`).join("");
+  const infos = (r.info||[]).map(i =>
+    `<div class="flex gap-2 items-start bg-blue-50 border border-blue-100 text-blue-800 rounded-lg p-3 text-xs"><span>ℹ️</span><span>${i}</span></div>`).join("");
+
+  box.innerHTML = `
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-3">
+      <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wide mb-1">Posologia</p>
+      <p class="text-slate-900 font-semibold whitespace-pre-line leading-relaxed">${r.posologia}</p>
+    </div>
+    <div class="space-y-2">${alertas}${infos}</div>
+  `;
 }
-</script></body>
+</script>
+</body>
 </html>
