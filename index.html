@@ -129,6 +129,12 @@
    ATB por peso usa atb(): {min,max} mg/kg/dia, conc em mg/mL, maxDia em mg/dia,
    dosesDia = nº de tomadas, dias = duração.
    ========================================================================= */
+/* Dipirona é contraindicada em menores de 3 meses MESMO que o bebê já pese
+   5 kg ou mais (um bebê de 2 meses pode pesar 5–6 kg). As Novalginas só
+   pedem o peso, então o aviso aparece sempre que o peso cai na faixa em que
+   isso pode acontecer (5 a 8 kg). */
+const AVISO_DIPIRONA_3M = "Contraindicado em menores de 3 meses, mesmo com 5 kg ou mais. Confirme a idade do bebê.";
+
 const MEDS = {
   /* ---------- ANTIBIÓTICOS ---------- */
   clavulin_bd: { grupo:"Antibióticos", nome:"Clavulin BD", principio:"Amoxicilina + clavulanato", apres:"400 mg/5 mL (80 mg/mL de amox.)", modo:"peso",
@@ -180,7 +186,8 @@ const MEDS = {
       const gotas = Math.min(Math.round(c.peso), 40);
       return { posologia: `Novalgina 500 mg/mL: Tomar ${gotas} gotas (1 gota/kg) de 6/6h, se necessário.`,
         info:[`1 gota = 25 mg (≈25 mg/kg/dose). Máx. 40 gotas (1000 mg)/dose, até 4×/dia.`],
-        alertas: c.peso < 5 ? ["Contraindicado abaixo de 5 kg / 3 meses."] : [] };
+        alertas: c.peso < 5 ? ["Contraindicado abaixo de 5 kg / 3 meses."]
+               : c.peso < 9 ? [AVISO_DIPIRONA_3M] : [] };
     } },
 
   novalgina_solucao: { grupo:"Analgésicos / Antitérmicos (solução oral)", nome:"Novalgina Solução Oral", principio:"Dipirona", apres:"50 mg/mL (seringa/copo dosador)", modo:"peso",
@@ -193,11 +200,13 @@ const MEDS = {
         {min:31, max:45, idade:"10 a 12 anos", minMl:7.5, maxMl:15, maxDia:60},
         {min:46, max:53, idade:"13 a 14 anos", minMl:8.75, maxMl:17.5, maxDia:70}
       ];
-      const f = faixas.find(x => c.peso >= x.min && c.peso <= x.max);
-      if (!f) {
-        if (c.peso < 5) return erro("Contraindicado para crianças menores de 3 meses ou com menos de 5 kg.");
-        return erro("Acima de 53 kg / 14 anos: considerar posologia de adulto ou outra apresentação, conforme avaliação clínica.");
-      }
+      if (c.peso < 5) return erro("Contraindicado para crianças menores de 3 meses ou com menos de 5 kg.");
+      if (c.peso > 53) return erro("Acima de 53 kg / 14 anos: considerar posologia de adulto ou outra apresentação, conforme avaliação clínica.");
+      // A bula dá as faixas em kg inteiros (5–8, 9–15...). Peso "quebrado"
+      // entre duas faixas (ex.: 8,5 kg) fica na faixa de BAIXO, a de menor
+      // dose. Antes esses pesos caíam fora de todas as faixas e a tela dizia
+      // "Acima de 53 kg" para um bebê de 8,5 kg.
+      const f = [...faixas].reverse().find(x => c.peso >= x.min);
       return {
         posologia: `Novalgina Infantil solução oral 50 mg/mL: Tomar ${fmt(f.minMl)} a ${fmt(f.maxMl)} mL de 6/6h, se necessário.`,
         info:[
@@ -205,7 +214,7 @@ const MEDS = {
           `Dose máxima diária: ${fmt(f.maxDia)} mL (${fmt(f.maxDia*50)} mg), equivalente a 4 tomadas de ${fmt(f.maxMl)} mL.`,
           `Administrar por via oral com seringa ou copo dosador. Não ultrapassar 4 tomadas ao dia.`
         ],
-        alertas: []
+        alertas: f.min === 5 ? [AVISO_DIPIRONA_3M] : []
       };
     } },
 
@@ -445,8 +454,14 @@ function calcular(){
     ctx.divisoes = parseInt(document.getElementById("divisoes").value);
     ctx.doseMaxTotal = parseFloat(document.getElementById("doseMaxTotal").value);
     ctx.frasco = parseFloat(document.getElementById("frasco").value);
-    if ([ctx.doseMin,ctx.doseMax,ctx.concentracao,ctx.divisoes,ctx.doseMaxTotal,ctx.frasco].some(isNaN))
+    const manuais = [ctx.doseMin,ctx.doseMax,ctx.concentracao,ctx.divisoes,ctx.doseMaxTotal,ctx.frasco];
+    if (manuais.some(isNaN))
       return render({ erro:"Preencha todos os campos manuais." });
+    // Zero ou negativo em qualquer campo dava divisão por zero ("Infinity mL").
+    if (manuais.some(n => !isFinite(n) || n <= 0))
+      return render({ erro:"Os campos manuais precisam ser maiores que zero." });
+    if (ctx.doseMin > ctx.doseMax)
+      return render({ erro:"A dose mínima não pode ser maior que a máxima." });
   }
 
   render(m.calc(ctx));
